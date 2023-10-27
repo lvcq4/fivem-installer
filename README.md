@@ -30,5 +30,5 @@ select whether you want to use txadmin
 with the different frameworks the script will install everything correctly
 * if it will be too complicated for the script, a file will be created containing everything you need to do after the installation of the server.
 
-Eventual support for RedM in version 2.0.0
-* The script (2.0.0) may also be able to install Server for RedM
+Eventual support for RedM in version 2.5.0
+* The script (2.5.0) may also be able to install Server for RedM
