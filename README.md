@@ -1,34 +1,46 @@
-# FiveM Server-Installer Script v1.5.1
+## FiveM Installer v2.0.0
 
-Build: latest recommend build
+Build: Latest recommended build
 
-OS: Linux
+Operating System: Linux
 
-## What is installed?
-FiveM-Server artifacts, cfx-server-data, ESX-Framework and MariaDB Server (both can be rejected)
+### What's Included?
 
-## How to install?
-1. Go to a folder of your choice
-2. ```apt install git```
-3. ```git clone https://github.com/lvcq1/fivem-installer-script.git installer-script```
-4. ```cd installer-script```
-5. ```./installer.sh```
-6. Follow the script...
-7. When it's finished installing, you can delete the script with ```rm installer.sh``` if you want.
+This installer provides the following components:
 
-## Contributors
-https://github.com/Razuuu & https://github.com/lvcq1
+- FiveM Server artifacts
+- cfx-server-data
+- server.cfg
+- ESX Framework (optional)
+- MariaDB Server (optional)
 
-## Planned updates for the future
-select whether you want to use txadmin
-* if yes, you will be able to choose whether you want to install a framework that is installed by txadmin, or upload it yourself
-* if you want to upload it yourself, there will still be the possibility that the script will install it, if you want that you can choose from different framework versions
-* if you don't want to upload it yourself, you can then choose whether you want to use the server.cfg from txadmin or the official one from fivem.net
-* 
-* with both answers you will be asked if you have a database, if no, a mysql server will be installed, web server, and phpmyadmin. If yes, the script is terminated.
+### How to Install
 
-with the different frameworks the script will install everything correctly
-* if it will be too complicated for the script, a file will be created containing everything you need to do after the installation of the server.
+Follow these steps to install FiveM on your system:
 
-Eventual support for RedM in version 2.0.0
-* The script (2.0.0) may also be able to install Server for RedM
+1. Navigate to a directory of your choice.
+2. Install Git by running: `apt install git`
+3. Clone this repository by executing: `git clone https://github.com/lvcq4/fivem-installer.git installer-script`
+4. Change your working directory to the installer script: `cd installer-script`
+5. Run the installation script: `./installer.sh`
+6. Follow the on-screen prompts.
+7. Once the installation is complete, you can remove the script by using: `rm installer.sh`, if desired.
+
+### Contributors
+
+- [lvcq4](https://github.com/lvcq4)
+
+### Planned Future Updates
+
+In future versions, we plan to include the following features:
+
+- Option to integrate with txadmin.
+  - If selected, you can choose to install a framework recommended by txadmin or upload your own.
+  - If you opt to upload your own framework, you can select from different framework versions.
+  - You can also choose to use the server.cfg from txadmin or the official one from fivem.net.
+- If you don't have a database, the script will install a MySQL server, web server, and phpMyAdmin.
+- Select different languages.
+- Support for RedM in version 2.5.0.
+  - The script may also offer the ability to install a RedM server.
+
+Feel free to contribute to this project and stay tuned for [updates](https://github.com/lvcq4/fivem-installer/blob/main/changelog.txt)!
