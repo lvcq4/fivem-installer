@@ -1,125 +1,138 @@
 #!/bin/bash
 
-# Vars
+clear
 
-function WRONG_ANSWER {
-echo "Wrong answer, please use option above!"
-}
+
+echo "This is a FiveM installer script. If an error occurs, please report it on Github. The script will continue immediately..."
+
+sleep 5
 
 clear
 
-BUILD="5848-4f71128ee48b07026d6d7229a60ebc5f40f2b9db"
+# Check if all required packages are installed
+PACKAGES=("curl" "screen" "git" "tar" "xz-utils")
+
+for pkg in ${PACKAGES[@]}; do
+    if ! dpkg -l | grep -q "ii  $pkg "; then
+        echo "Installing package $pkg..."
+        apt-get install -y $pkg > /dev/null
+        if [ $? -ne 0 ]; then
+            echo "Error installing $pkg. Please check your network connection and try again."
+            exit 1
+        fi
+    fi
+done
+
+clear 
+
+# Download the FiveM server build
+BUILD="6683-9729577be50de537692c3a19e86365a5e0f99a54"
 TMP_FOLDER="/tmp/fivem-installer"
 
-# Install dependencies
-APT_PACKAGELIST=""
-PACKAGELIST="curl screen git tar xz-utils"
-for PACKAGE in $PACKAGELIST; do
-	[ -z $(which $PACKAGE) ] && APT_PACKAGELIST="$APT_PACKAGELIST $PACKAGE"
-done
-[ ! -z "$APT_PACKAGELIST" ] && echo "Install dependencies, this takes some time..." \
-&& apt-get update -y >/dev/null && apt-get install -y $APT_PACKAGELIST >/dev/null
-
-clear
-
-# Download fivem server
 mkdir -p $TMP_FOLDER
-echo -e "Download FiveM Server build ${BUILD}, please wait...\n"
-curl "https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/${BUILD}/fx.tar.xz" -o "${TMP_FOLDER}/fx.tar.xz" --progress-bar
 
 clear
 
-# Let user select fivem server location
-echo "Select folder, where the FiveM server will be installed"
-read -e -p " » " -i "/home/fivem" SELECTED_FOLDER
+# Download the build
+echo "Downloading Server Build ($BUILD), please wait..."
+curl -o "${TMP_FOLDER}/fx.tar.xz" "https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/${BUILD}/fx.tar.xz" --progress-bar
 
-# Check if folder is empty
-if [ ! -d ${SELECTED_FOLDER} ]; then
-	mkdir -p ${SELECTED_FOLDER}
+clear 
+
+# Installation directory
+read -p "Please specify the installation directory for the FiveM server (e.g., /home/fivem): " INSTALL_DIR
+INSTALL_DIR=${INSTALL_DIR:-$SERVER_FOLDER}
+
+clear
+
+# Check if the directory already exists
+if [ -d "$INSTALL_DIR" ]; then
+    read -p "The selected folder is not empty. Do you want to delete the existing files and use the folder (y/n)? " DELETE_EXISTING
+    if [ "$DELETE_EXISTING" == "y" ]; then
+        rm -rf "$INSTALL_DIR"/*
+    else
+        read -p "Do you want to choose another folder (y/n)? " CHOOSE_ANOTHER
+        if [ "$CHOOSE_ANOTHER" == "y" ]; then
+            read -p "Specify the new installation directory: " INSTALL_DIR
+        fi
+    fi
+fi
+
+clear 
+
+# Create the installation directory if it doesn't exist
+mkdir -p "$INSTALL_DIR"
+
+# Move and unpack the build file
+mv "${TMP_FOLDER}/fx.tar.xz" "$INSTALL_DIR/"
+cd "$INSTALL_DIR"
+tar -xJf "fx.tar.xz"
+rm "fx.tar.xz"
+rmdir "$TMP_FOLDER"
+
+echo -e "Installing cfx-server-data\n"
+cd "$INSTALL_DIR"
+git clone https://github.com/citizenfx/cfx-server-data
+
+clear 
+
+# Ask for server.cfg installation
+read -p "Do you want to install a server.cfg file (y/n)? " INSTALL_SERVER_CFG
+
+clear 
+
+if [ "$INSTALL_SERVER_CFG" == "y" ]; then
+cd "$INSTALL_DIR/cfx-server-data/"
+    wget https://raw.githubusercontent.com/lvcq4/fivem-dependencies/main/server.cfg
+    echo "Installing server.cfg..."
 else
-	echo "Selected folder is not empty, do you want to delete and create the folder?"
-	while true; do
-		read -p "(y/n): " yn
-		echo
-		case $yn in
-			[Yy]) rm -rf ${SELECTED_FOLDER}; mkdir -p ${SELECTED_FOLDER}; break;;
-			[Nn]) echo "Exit script!"; exit 0;;
-			   *) echo "Wrong answer, try again";;
-		esac
-	done
+    echo "You have chosen not to install a server.cfg file."
+fi
+
+clear 
+
+# Ask for ESX installation
+read -p "Do you want to install esx? (y/n)? " INSTALL_ESX
+
+clear 
+
+if [ "$INSTALL_ESX" == "y" ]; then
+    echo "Choose the ESX version:"
+    echo "1) ESX-Legacy (not available)"
+    echo "2) ESX-1.0"
+    
+    read -p "Your choice (1/2): " ESX_VERSION
+    cd $INSTALL_DIR/cfx-server-data/resources/
+    if [ "$ESX_VERSION" == "1" ]; then
+        git clone https://github.com/lvcq4/..
+    elif [ "$ESX_VERSION" == "2" ]; then
+        git clone https://github.com/lvcq4/esx-framework-1.0
+        cd $INSTALL_DIR/cfx-server-data/resources/esx-framework-1.0 
+		mv * $INSTALL_DIR/cfx-server-data/resources/
+		cd $INSTALL_DIR/cfx-server-data/resources/
+		mv esx [esx]
+		rm esx-framework-1.0 -r;
+        echo "Installing ESX-1.0..."
+    else
+        echo "Invalid choice."
+    fi
+else
+    echo "You have chosen not to install the ESX Framework."
 fi
 
 clear
 
-echo "Move file to selected folder and go inside"
-mv ${TMP_FOLDER}/fx.tar.xz ${SELECTED_FOLDER}/
-cd ${SELECTED_FOLDER}
+# Ask for database installation
+read -p "Do you want to install a database (y/n)? " INSTALL_DB
 
-clear
+if [ "$INSTALL_DB" == "y" ]; then
+    echo "Install MariaDB-Server, please wait..."; apt-get install mariadb-server -y >/dev/null;
+    echo "Installing database..."
+else
+    echo "You have chosen not to install a database."
+fi
 
-echo "Extract and delete file"
-tar xf fx.tar.xz
-rm fx.tar.xz
+clear 
 
-clear
+echo "Installation is complete."
 
-echo "Delete temp folder"
-rm -rf ${TMP_FOLDER}
-
-clear
-
-echo -e "Installing cfx-server-data\n"
-git clone https://github.com/citizenfx/cfx-server-data
-
-clear
-
-echo -e "Downloading server.cfg\n"
-cd ${SELECTED_FOLDER}/cfx-server-data/
-wget https://lvcq.xyz/dl/fm-ds/latest/server.cfg/
-
-clear
-
-echo "Do you want to install ESX-Framework?"
-while true; do
-	read -e -p "(y/n): " -i "y" yn3
-	case $yn3 in
-		[Yy])
-		echo "Which version do you want to install?"
-		echo -e "1) ESX-Legacy (available but not tested yet)\n2) ESX-1.0 (recommended)\n"
-		cd ${SELECTED_FOLDER}/cfx-server-data/resources/
-		while true; do
-			read -e -p " » " -i "2" ESX_VERSION
-			case $ESX_VERSION in
-				1) git clone https://github.com/lvcq1/esx_core
-					cd ${SELECTED_FOLDER}/cfx-server-data/resources/
-				 	mv * ${SELECTED_FOLDER}/cfx-server-data/resources/ ..
-					cd ${SELECTED_FOLDER}/cfx-server-data/resources/; break;;
-				2) git clone https://github.com/lvcq1/esx-framework-1.0 
-					cd ${SELECTED_FOLDER}/cfx-server-data/resources/esx-framework-1.0 
-				 	mv * ${SELECTED_FOLDER}/cfx-server-data/resources/ ..
-					cd ${SELECTED_FOLDER}/cfx-server-data/resources/
-					mv esx [esx]
-					rm esx-framework-1.0 -r; break;;
-				*) echo "Wrong answer, try again";;
-			esac
-		done
-		break;;
-		[Nn]) echo "Exit script!"; exit 0;;
-		   *) echo "Wrong answer, try again";;
-	esac
-done
-
-clear
-
-echo "Do you have a Database?"
-while true; do
-                read -e -p "(y/n): " -i "n" yn4
-                case $yn4 in
-                        [Yy]) echo "Exit script!"; exit 0;;
-                        [Nn]) echo "Install MariaDB-Server, please wait..."; apt-get install mariadb-server -y >/dev/null; break;;
-                           *) echo "Wrong answer, try again";;
-                esac
-        done
-
-
-exit 0
