@@ -106,12 +106,12 @@ if [ "$INSTALL_ESX" == "y" ]; then
     if [ "$ESX_VERSION" == "1" ]; then
         git clone https://github.com/lvcq4/..
     elif [ "$ESX_VERSION" == "2" ]; then
-        git clone https://github.com/lvcq4/esx-framework-1.0
-        cd $INSTALL_DIR/cfx-server-data/resources/esx-framework-1.0 
+        git clone https://github.com/lvcq4/esx-framework
+        cd $INSTALL_DIR/cfx-server-data/resources/esx-framework 
 		mv * $INSTALL_DIR/cfx-server-data/resources/
 		cd $INSTALL_DIR/cfx-server-data/resources/
 		mv esx [esx]
-		rm esx-framework-1.0 -r;
+		rm esx-framework -r;
         echo "Installing ESX-1.0..."
     else
         echo "Invalid choice."
